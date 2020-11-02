@@ -18,6 +18,18 @@ if ~exist(data_directory, 'dir')
     if ~strcmp(input_parameters.mask_file,'')
         copyfile(fullfile(initial_directory, input_parameters.mask_file), data_directory)
     end
+    
+    % Take out b0 signals
+    xps = mdm_xps_load(fullfile(data_directory, input_parameters.xps_file));
+    ind = xps.b*1e-9 < 0.05;
+    if nnz(ind) > 0
+        xps = mdm_xps_subsample(xps, ~ind);
+        mdm_xps_save(xps, fullfile(data_directory, input_parameters.xps_file));
+        
+        [s, h] = mdm_nii_read(fullfile(data_directory, input_parameters.data_file));
+        s = s(:, :, :, ~ind);
+        mdm_nii_write(s, fullfile(data_directory, input_parameters.data_file), h);
+    end
 end
 
 % Start parallel pool if not already open
