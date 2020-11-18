@@ -100,6 +100,7 @@ sz = size(m);
 Nx = sz(1);
 Ny = sz(2);
 Nz = sz(3);
+size_m = sz(4); 
 ind = false(sz(4),1);
 ind(2:nb_dimension+1:end) = 1;
 % nn = (sz(4)-1)/(nb_dimension+1);
@@ -143,21 +144,19 @@ odf_bsmedian.minimal_angular_separation = minimal_angular_separation;
 odf_bsmedian.kappa = odf_smooth.kappa;
 odf_bsmedian.standard_deviation = standard_deviation;
 
-%% Pre-read all of bootstrap solutions
-m_global = zeros([nb_MC_inversions, Nx, Ny, Nz, sz(4)]);
+%% Pre-read bootstrap solutions
+% Decrease dimensionality to lower memory cost
+mask = reshape(mask, Nx*Ny*Nz, 1)';
+N = nnz(mask);
+m_global = zeros([nb_MC_inversions, N, size_m]);
 parfor nBS = 1:nb_MC_inversions
     mfs = mdm_mfs_load(fullfile(fullfile(bootstrap_directory,num2str(nBS)), 'mfs.mat'));
-    m_global(nBS,:,:,:,:) = mfs.m;
+    map = reshape(mfs.m, Nx*Ny*Nz, size_m);
+    
+    % Retain only non-masked-out voxels.
+    map = map(mask > 0, :);
+    m_global(nBS,:,:) = map;  
 end
-
-% Decrease dimensionality to lower memory cost
-[~, ~, ~, ~, size_m] = size(m_global);
-m_global = reshape(m_global, nb_MC_inversions, Nx*Ny*Nz, size_m);
-mask = reshape(mask, Nx*Ny*Nz, 1)';
-
-% Retain only non-masked-out voxels.
-m_global = m_global(:, mask>0, :);
-[~, N, ~] = size(m_global);
 
 %% Compute medians across bootstrap solutions
 s0 = zeros(N, 1);
