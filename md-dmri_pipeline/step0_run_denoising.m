@@ -38,19 +38,22 @@ end
 
 %% Run denoising
 if strcmp(mask_file,'')
-    [data_denoised, noise_std_map, nb_principal_components_map] = MP_PCA_denoise(data, window);
+    [data_denoised, noise_std_map_before, noise_std_map_after, nb_principal_components_map] = MP_PCA_denoise(data, window);
 else
     mask = mdm_nii_read(fullfile(data_path, mask_file));
     mask = logical(mask);
-    [data_denoised, noise_std_map, nb_principal_components_map] = MP_PCA_denoise(data, window, mask);
+    [data_denoised, noise_std_map_before, noise_std_map_after, nb_principal_components_map] = MP_PCA_denoise(data, window, mask);
 end
 
 %% Save images
 % Denoised images
 mdm_nii_write(data_denoised, fullfile(data_path, 'data_dn.nii.gz'), h);
 
-% Map of estimated noise standard deviation variance
-mdm_nii_write(noise_std_map, fullfile(data_path, 'noise_std.nii.gz'), h);
+% Map of estimated noise standard deviation variance before denoising
+mdm_nii_write(noise_std_map_before, fullfile(data_path, 'noise_std_before.nii.gz'), h);
+
+% Map of estimated noise standard deviation variance after denoising
+mdm_nii_write(noise_std_map_after, fullfile(data_path, 'noise_std_after.nii.gz'), h);
 
 % Number of detected signal principal components
 mdm_nii_write(nb_principal_components_map, fullfile(data_path, 'nb_principal_components.nii.gz'), h);
