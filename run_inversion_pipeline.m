@@ -7,17 +7,20 @@ close all
 
 %% Input files
 input_parameters.initial_directory = fullfile(pwd, 'Data_directory'); % Where the data can be found
-input_parameters.data_file = 'data_mc.nii.gz'; % Diffusion/relaxation data
+input_parameters.data_file = 'data.nii.gz'; % Diffusion/relaxation data
 input_parameters.mask_file = 'data_mask.nii.gz'; % Data mask - If no mask, simply write '', one will be generated from mdm_s_mask
-input_parameters.xps_file = 'data_mc_xps.mat'; % xps matfile
+input_parameters.xps_file = 'data_xps.mat'; % xps matfile
 
-%% Inversion method
-input_parameters.inversion_method = 'dtd';
-input_parameters.do_covariance = 0;
+%% MP-PCA denoising (only works for diffusion data for now, preferably run on isotropic-resolution data)
+input_parameters.do_denoise = 0;
 
 %% Data correction (extrapolated references + Elastix)
 input_parameters.do_data_correction = 0;
 input_parameters.do_rotate_bvec = 0;
+
+%% Inversion method
+input_parameters.inversion_method = 'dtd';
+input_parameters.do_covariance = 0;
 
 %% Global parameters
 input_parameters.nb_MC_inversions = 32; % Number of Monte Carlo realizations

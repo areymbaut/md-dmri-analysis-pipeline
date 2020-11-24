@@ -23,21 +23,13 @@ if ~exist(data_directory, 'dir')
     xps = mdm_xps_load(fullfile(data_directory, input_parameters.xps_file));
     ind = xps.b*1e-9 < 0.05;
     if nnz(ind) > 0
+        fprintf('Taking out b0 signals before analysis...\n')
         xps = mdm_xps_subsample(xps, ~ind);
         mdm_xps_save(xps, fullfile(data_directory, input_parameters.xps_file));
         
         [s, h] = mdm_nii_read(fullfile(data_directory, input_parameters.data_file));
         s = s(:, :, :, ~ind);
         mdm_nii_write(s, fullfile(data_directory, input_parameters.data_file), h);
-    end
-end
-
-% Start parallel pool if not already open
-if isempty(gcp('nocreate'))
-    if isfinite(input_parameters.nb_parallel_workers)
-        parpool('local', input_parameters.nb_parallel_workers);
-    else
-        parpool('local');
     end
 end
 
@@ -70,9 +62,28 @@ if logical(length(xps_fields_initial))
    mdm_xps_save(xps, fullfile(data_directory, input_parameters.xps_file))
 end
 
+%% MP-PCA DENOISING
+if input_parameters.do_denoise
+    if ~isfile(fullfile(data_directory,'data_dn.nii.gz'))
+        fprintf('\nSTEP 0: Running MP-PCA denoising...\n')
+        t_start = tic;
+        step0_run_denoising(input_parameters)
+        toc(t_start)
+    else
+        fprintf('\nSTEP 0 ALREADY PERFORMED: data denoised using MP-PCA denoising...\n')
+    end
+    input_parameters.data_file = 'data_dn.nii.gz';
+end
+
 %% DATA CORRECTION
-if input_parameters.do_data_correction 
-    if ~isfile(fullfile(data_directory,'data_mc.nii.gz'))
+if input_parameters.do_data_correction  
+    if input_parameters.do_denoise
+        done = isfile(fullfile(data_directory,'data_dn_mc.nii.gz'));
+    else
+        done = isfile(fullfile(data_directory,'data_mc.nii.gz'));
+    end
+    
+    if ~done
         fprintf('\nSTEP 0: Running correction via extrapolation-based references...\n')
         t_start = tic;
         step0_run_correction(input_parameters)
@@ -80,8 +91,23 @@ if input_parameters.do_data_correction
     else
         fprintf('\nSTEP 0 ALREADY PERFORMED: data corrected using extrapolation-based references...\n')
     end
-    input_parameters.data_file = 'data_mc.nii.gz'; % Adapt for name change upon correction ("mc" = "motion-corrected" + eddy-corrected)
-    input_parameters.xps_file = 'data_mc_xps.mat';
+    
+    if input_parameters.do_denoise
+        input_parameters.data_file = 'data_dn_mc.nii.gz'; % Adapt for name change upon correction ("mc" = "motion-corrected" + eddy-corrected)
+        input_parameters.xps_file = 'data_dn_mc_xps.mat';
+    else
+        input_parameters.data_file = 'data_mc.nii.gz'; % Adapt for name change upon correction ("mc" = "motion-corrected" + eddy-corrected)
+        input_parameters.xps_file = 'data_mc_xps.mat';
+    end 
+end
+
+%% Start parallel pool if not already open
+if isempty(gcp('nocreate'))
+    if isfinite(input_parameters.nb_parallel_workers)
+        parpool('local', input_parameters.nb_parallel_workers);
+    else
+        parpool('local');
+    end
 end
 
 %% ANALYSIS (DTD_COVARIANCE)

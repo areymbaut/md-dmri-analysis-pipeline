@@ -85,7 +85,7 @@ odf_bsmedian.sqddelta_bin = odf_bsmedian.sqddelta_bin(mask>0, :);
 odf_bsmedian.r1_bin = odf_bsmedian.r1_bin(mask>0, :);
 odf_bsmedian.t1_bin = odf_bsmedian.t1_bin(mask>0, :);
 odf_bsmedian.r2_bin = odf_bsmedian.r2_bin(mask>0, :);
-odf_bsmedian.t2_bin = odf_bsmedian.r2_bin(mask>0, :);
+odf_bsmedian.t2_bin = odf_bsmedian.t2_bin(mask>0, :);
 N = length(nb_sh_peaks_map);
 
 all_peaks = single(zeros(N, 3*max_n_peaks));

@@ -20,7 +20,7 @@ output_path = data_path;
  
 % Write the elastix parameter file
 p = elastix_p_affine(200);
-p_fn = elastix_p_write(p, 'p.txt');
+p_fn = elastix_p_write(p, fullfile(data_path, 'p.txt'));
   
 % Run an extrapolation-based registration
 mdm_s_mec(s, p_fn, output_path, opt);
