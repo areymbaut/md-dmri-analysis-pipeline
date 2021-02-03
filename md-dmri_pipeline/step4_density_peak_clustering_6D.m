@@ -120,6 +120,7 @@ all_dpar_thin = reshape(all_dpar_thin, Nx*Ny*Nz, size_all);
 all_dperp_thin = reshape(all_dperp_thin, Nx*Ny*Nz, size_all);
 all_theta_thin = reshape(all_theta_thin, Nx*Ny*Nz, size_all);
 all_phi_thin = reshape(all_phi_thin, Nx*Ny*Nz, size_all);
+all_w_thin = reshape(all_w_thin, Nx*Ny*Nz, size_all);
 all_r1_thin = reshape(all_r1_thin, Nx*Ny*Nz, size_all);
 all_r2_thin = reshape(all_r2_thin, Nx*Ny*Nz, size_all);
 nb_peaks_map = reshape(nb_peaks_map, Nx*Ny*Nz, 1);
@@ -131,6 +132,7 @@ all_dpar_thin = all_dpar_thin(combined_mask>0, :);
 all_dperp_thin = all_dperp_thin(combined_mask>0, :);
 all_theta_thin = all_theta_thin(combined_mask>0, :);
 all_phi_thin = all_phi_thin(combined_mask>0, :);
+all_w_thin = all_w_thin(combined_mask>0, :);
 all_r1_thin = all_r1_thin(combined_mask>0, :);
 all_r2_thin = all_r2_thin(combined_mask>0, :);
 nb_peaks_map = nb_peaks_map(combined_mask>0);
@@ -380,19 +382,19 @@ end
 map_cluster_metrics = reshape(dummy_map, Nx, Ny, Nz);
 
 dummy = zeros(Nx*Ny*Nz, 1);
-dummy(:, combined_mask>0) = mask_repeated_clustering;
+dummy(combined_mask>0) = mask_repeated_clustering;
 mask_repeated_clustering = reshape(dummy, Nx, Ny, Nz);
 
 dummy = zeros(Nx*Ny*Nz, 1);
-dummy(:, combined_mask>0) = mask_odd_clustering;
+dummy(combined_mask>0) = mask_odd_clustering;
 mask_odd_clustering = reshape(dummy, Nx, Ny, Nz);
 
 dummy = zeros(Nx*Ny*Nz, 3*max_nb_clusters);
-dummy(:, combined_mask>0) = cluster_median_orientations;
+dummy(combined_mask>0, :) = cluster_median_orientations;
 cluster_median_orientations = single(reshape(dummy, Nx, Ny, Nz, 3*max_nb_clusters));
 
 dummy = zeros(Nx*Ny*Nz, 3*max_nb_clusters);
-dummy(:, combined_mask>0) = cluster_median_orientations_weighted_by_w;
+dummy(combined_mask>0, :) = cluster_median_orientations_weighted_by_w;
 cluster_median_orientations_weighted_by_w = single(reshape(dummy, Nx, Ny, Nz, 3*max_nb_clusters));
 
 %% CREATING MASKS and MAPS
